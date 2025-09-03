@@ -351,17 +351,19 @@
 </body>
 <script>
   // Hàm lấy tham số ?name=...
-  function getQueryParam(param) {
-    const urlParams = new URLSearchParams(window.location.search);
-	return value ? decodeURIComponent(value) : null;
+function getQueryParam(param) {
+    const query = window.location.search.substring(1);
+  	const vars = new URLSearchParams(query);
+  	const raw = vars.get(param);
+  	return raw ? decodeURIComponent(escape(raw)) : null;
   }
 
-  const guestName = getQueryParam('name');
-  if (guestName) {
-    // Nếu có name trong URL → bỏ qua bước nhập, hiện thẳng thiệp
-    document.getElementById('guest').textContent = guestName;
-    document.getElementById('page-1').classList.remove('active');
-    document.getElementById('page-2').classList.add('active');
-  }
+const guestName = getQueryParam('name');
+const guestName = getQueryParam('name');
+if (guestName) {
+  guestSpan.textContent = guestName;
+} else {
+  guestSpan.textContent = "bạn thân mến"; // fallback khi không có ?name=
+}
 </script>	
 </html>
