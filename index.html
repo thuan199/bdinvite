@@ -51,6 +51,7 @@
 
     .card {
       width: min(680px, 92vw);
+	  margin: auto;	
       background: var(--card-bg);
       backdrop-filter: blur(10px) saturate(120%);
       border-radius: var(--radius);
@@ -197,6 +198,12 @@
     @media (prefers-reduced-motion: reduce) {
       * { animation: none !important; transition: none !important; }
     }
+
+	@media (max-width: 480px) {
+  		.card-body {padding: 16px;}
+  		.invite {font-size: 16px;line-height: 1.5;
+  	}
+}
   </style>
 </head>
 <body>
@@ -236,7 +243,7 @@
         <div class="card-body">
           <div class="invite">
             <h2>Giấy triệu tập bị can</h2>
-            <p class="lead"><span class="typewriter"><strong>Thằng mặt phụ khoa: <span id="guest">tml</span></strong></span></p>
+            <p class="lead"><span class="typewriter"><strong>Đối tượng: <span id="guest">tml</span></strong></span></p>
             <p>Đúng<strong>19:00 ngày 19/09/2025</strong> có mặt tại văn phòng <strong>Cừu Non Hy Lạp</strong>.</p>
             <p>Địa chỉ: <strong>395 Hoàng Sa, Phường Võ Thị Sáu, Quận 3, Hồ Chí Minh</strong>.</p>
             <p>Để làm việc về nội dung liên quan đến tình hình đá bia hiện nay. Chào thân ái và bóp d*i. 👋🏻</p>
