@@ -260,20 +260,63 @@
   </main>
 
   <script>
-    const form = document.getElementById('form');
-    const nameInput = document.getElementById('name');
-    const guestSpan = document.getElementById('guest');
-    const page1 = document.getElementById('page-1');
-    const page2 = document.getElementById('page-2');
-    const editBtn = document.getElementById('editBtn');
-	const denyBtn = document.getElementById('denyBtn');
-    const joinBtn = document.getElementById('joinBtn');
+  // ===== Lấy element một lần =====
+  const form = document.getElementById('form');
+  const nameInput = document.getElementById('name');
+  const guestSpan = document.getElementById('guest');
+  const page1 = document.getElementById('page-1');
+  const page2 = document.getElementById('page-2');
+  const editBtn = document.getElementById('editBtn');
+  const denyBtn = document.getElementById('denyBtn');
+  const joinBtn = document.getElementById('joinBtn');
 
-    function sanitize(text) {
-      // Basic sanitize to prevent HTML injection
-      return text.replace(/[<>]/g, '');
+  // ===== Tiện ích =====
+  function sanitize(text) { return text.replace(/[<>]/g, ''); }
+  function swap(hideEl, showEl) {
+    if (!hideEl || !showEl) return;
+    hideEl.classList.remove('active');
+    showEl.classList.add('active');
+    const tw = showEl.querySelector('.typewriter');
+    if (tw) { tw.style.animation = 'none'; tw.offsetHeight; tw.style.animation = ''; }
+  }
+  function fireConfetti(count = 120) {
+    const colors = ['#ff6b6b', '#ffd43b', '#69db7c', '#74c0fc', '#b197fc', '#f783ac'];
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+      const size = 8 + Math.random() * 8;
+      piece.style.width = size + 'px';
+      piece.style.height = size * (0.8 + Math.random() * 0.6) + 'px';
+      piece.style.animation = `fall ${5 + Math.random() * 3}s linear`;
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      frag.appendChild(piece);
+      setTimeout(() => piece.remove(), 9000);
     }
+    document.body.appendChild(frag);
+  }
 
+  // ===== Lấy tham số ?name= (hỗ trợ tiếng Việt) =====
+  function getQueryParam(param) {
+    const params = new URLSearchParams(window.location.search);
+    const raw = params.get(param);
+    // chỉ cần decodeURIComponent là đủ cho trình duyệt hiện đại
+    return raw ? decodeURIComponent(raw) : null;
+  }
+
+  // Nếu có ?name= → set tên + chuyển sang page-2
+  const guestName = getQueryParam('name');
+  if (guestName) {
+    guestSpan.textContent = guestName;
+    if (page1 && page2) swap(page1, page2);
+    fireConfetti(120);
+  }
+
+  // ===== Form nhập tên (khi KHÔNG có ?name=) =====
+  if (form) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = sanitize(nameInput.value.trim());
@@ -287,81 +330,45 @@
       swap(page1, page2);
       fireConfetti(150);
     });
-
-    editBtn.addEventListener('click', () => {
-      swap(page2, page1);
-      setTimeout(() => nameInput.focus(), 50);
+    nameInput?.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') form.requestSubmit();
     });
+  }
 
-	 joinBtn.addEventListener('click', () => {
-      alert('OK đó tml. 🎉');
-    });
+  // ===== Nút hành động =====
+  editBtn?.addEventListener('click', () => {
+    if (page1 && page2) { swap(page2, page1); setTimeout(() => nameInput?.focus(), 50); }
+  });
+  joinBtn?.addEventListener('click', () => { alert('OK đó tml. 🎉'); });
 
-    // "Từ chối" né chuột
-    denyBtn.addEventListener('mouseover', () => {
-      const offsetX = (Math.random() - 0.5) * 200;
-      const offsetY = (Math.random() - 0.5) * 120;
-      denyBtn.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
-      denyBtn.style.transition = 'transform 0.3s';
-    });
-
-    function swap(hideEl, showEl) {
-      hideEl.classList.remove('active');
-      showEl.classList.add('active');
-      // Restart typewriter effect by reflowing element
-      if (showEl === page2) {
-        const tw = showEl.querySelector('.typewriter');
-        if (tw) {
-          tw.style.animation = 'none';
-          tw.offsetHeight; // reflow
-          tw.style.animation = '';
-        }
-      }
+  // Nút "Từ chối" né chuột (ổn định hơn, theo dõi pointer toàn trang)
+  const R = 130; // bán kính kích hoạt
+  function moveDenyAway(pointerX, pointerY) {
+    if (!denyBtn) return;
+    const rect = denyBtn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = cx - pointerX;
+    const dy = cy - pointerY;
+    const dist = Math.hypot(dx, dy);
+    if (dist < R) {
+      const push = (R - dist) + 40;
+      const angle = Math.atan2(dy, dx);
+      const jitterX = (Math.random() - 0.5) * 30;
+      const jitterY = (Math.random() - 0.5) * 20;
+      const tx = Math.cos(angle) * push + jitterX;
+      const ty = Math.sin(angle) * push + jitterY;
+      denyBtn.style.transition = 'transform 0.12s linear';
+      denyBtn.style.transform = `translate(${tx}px, ${ty}px)`;
     }
+  }
+  document.addEventListener('pointermove', (e) => moveDenyAway(e.clientX, e.clientY), { passive: true });
+  denyBtn?.addEventListener('touchstart', (e) => {
+    const t = e.touches[0]; moveDenyAway(t.clientX, t.clientY);
+  }, { passive: true });
+  denyBtn?.addEventListener('mousedown', (e) => { moveDenyAway(e.clientX, e.clientY); e.preventDefault(); });
 
-    // Confetti generator (vanilla, lightweight)
-    function fireConfetti(count = 120) {
-      const colors = ['#ff6b6b', '#ffd43b', '#69db7c', '#74c0fc', '#b197fc', '#f783ac'];
-      const frag = document.createDocumentFragment();
-      for (let i = 0; i < count; i++) {
-        const piece = document.createElement('div');
-        piece.className = 'confetti';
-        piece.style.left = Math.random() * 100 + 'vw';
-        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
-        const size = 8 + Math.random() * 8;
-        piece.style.width = size + 'px';
-        piece.style.height = size * (0.8 + Math.random() * 0.6) + 'px';
-        piece.style.animation = `fall ${5 + Math.random() * 3}s linear`;
-        piece.style.animationDelay = (Math.random() * 0.5) + 's';
-        frag.appendChild(piece);
-        // auto cleanup
-        setTimeout(() => piece.remove(), 9000);
-      }
-      document.body.appendChild(frag);
-    }
+</script>
 
-	  // Hàm lấy tham số ?name=...
-	function getQueryParam(param) {
-	    const query = window.location.search.substring(1);
-	  	const vars = new URLSearchParams(query);
-	  	const raw = vars.get(param);
-	  	return raw ? decodeURIComponent(escape(raw)) : null;
-	  }
-	
-	const guestName = getQueryParam('name');
-	if (guestName) {
-	  guestSpan.textContent = guestName;
-	} else {
-	  guestSpan.textContent = "bạn thân mến"; // fallback khi không có ?name=
-	}  
-
-    // Accessibility: open with Enter in input
-    nameInput.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') {
-        form.requestSubmit();
-      }
-    });
-  </script>
 </body>
 </html>
