@@ -349,4 +349,19 @@
     });
   </script>
 </body>
+<script>
+  // Hàm lấy tham số ?name=...
+  function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(param);
+  }
+
+  const guestName = getQueryParam('name');
+  if (guestName) {
+    // Nếu có name trong URL → bỏ qua bước nhập, hiện thẳng thiệp
+    document.getElementById('guest').textContent = guestName;
+    document.getElementById('page-1').classList.remove('active');
+    document.getElementById('page-2').classList.add('active');
+  }
+</script>	
 </html>
