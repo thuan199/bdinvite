@@ -341,6 +341,21 @@
       document.body.appendChild(frag);
     }
 
+	  // Hàm lấy tham số ?name=...
+	function getQueryParam(param) {
+	    const query = window.location.search.substring(1);
+	  	const vars = new URLSearchParams(query);
+	  	const raw = vars.get(param);
+	  	return raw ? decodeURIComponent(escape(raw)) : null;
+	  }
+	
+	const guestName = getQueryParam('name');
+	if (guestName) {
+	  guestSpan.textContent = guestName;
+	} else {
+	  guestSpan.textContent = "bạn thân mến"; // fallback khi không có ?name=
+	}  
+
     // Accessibility: open with Enter in input
     nameInput.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter') {
@@ -349,20 +364,4 @@
     });
   </script>
 </body>
-<script>
-  // Hàm lấy tham số ?name=...
-function getQueryParam(param) {
-    const query = window.location.search.substring(1);
-  	const vars = new URLSearchParams(query);
-  	const raw = vars.get(param);
-  	return raw ? decodeURIComponent(escape(raw)) : null;
-  }
-
-const guestName = getQueryParam('name');
-if (guestName) {
-  guestSpan.textContent = guestName;
-} else {
-  guestSpan.textContent = "bạn thân mến"; // fallback khi không có ?name=
-}
-</script>	
 </html>
