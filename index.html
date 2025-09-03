@@ -353,7 +353,7 @@
   // Hàm lấy tham số ?name=...
   function getQueryParam(param) {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get(param);
+	return value ? decodeURIComponent(value) : null;
   }
 
   const guestName = getQueryParam('name');
